@@ -1,16 +1,18 @@
 ---
 title: Use a Gateway - Zed
-description: Configure OpenRouter, Vercel AI Gateway, Amazon Bedrock, and other gateway or cloud model platforms in Zed.
+description: Configure OpenRouter, Vercel AI Gateway, NVIDIA NIM, OmniRoute, Amazon Bedrock, and other gateway or cloud model platforms in Zed.
 ---
 
 # Use a Gateway
 
-Use a gateway when you route model requests through a platform such as OpenRouter, Vercel AI Gateway, Amazon Bedrock, or another OpenAI-compatible service.
+Use a gateway when you route model requests through a platform such as OpenRouter, Vercel AI Gateway, NVIDIA NIM, OmniRoute, Amazon Bedrock, or another OpenAI-compatible service.
 
 | Gateway                   | Zed AI features | [External Agents](./external-agents.md) | Terminal Threads | Notes                                        |
 | ------------------------- | --------------- | --------------------------------------- | ---------------- | -------------------------------------------- |
 | OpenRouter                | Yes             | Separate config                         | Separate config  | Uses OpenRouter API access                   |
 | Vercel AI Gateway         | Yes             | Separate config                         | Separate config  | Uses Vercel AI Gateway API access            |
+| NVIDIA NIM                | Yes             | Separate config                         | Separate config  | Uses NVIDIA API key                          |
+| OmniRoute                 | Yes             | Separate config                         | Separate config  | Local OpenAI-compatible router               |
 | Amazon Bedrock            | Yes             | Separate config                         | Separate config  | Uses AWS credentials or Bedrock bearer token |
 | OpenAI-compatible gateway | Yes             | Separate config                         | Separate config  | Configure base URL, model, and key           |
 
@@ -116,6 +118,76 @@ You can set a custom endpoint for Vercel AI Gateway in settings:
   "language_models": {
     "vercel_ai_gateway": {
       "api_url": "https://ai-gateway.vercel.sh/v1"
+    }
+  }
+}
+```
+
+## NVIDIA NIM {#nvidia-nim}
+
+Use NVIDIA NIM when you want Zed AI features through NVIDIA's OpenAI-compatible API.
+
+1. Create an API key from your [NVIDIA API keys page](https://build.nvidia.com/settings/api-keys).
+2. Open **Settings → AI → LLM Providers** with {#action agent::OpenSettings} and find the NVIDIA NIM row.
+3. Enter your NVIDIA API key.
+
+Zed reads `NVIDIA_API_KEY`, falling back to `NVIDIA_NIM_API_KEY`, from the local Zed process environment.
+
+You can set a custom endpoint for NVIDIA NIM in settings:
+
+```json [settings]
+{
+  "language_models": {
+    "nvidia_nim": {
+      "api_url": "https://integrate.api.nvidia.com/v1"
+    }
+  }
+}
+```
+
+When using NVIDIA NIM as your assistant provider, select a model in your settings:
+
+```json [settings]
+{
+  "agent": {
+    "default_model": {
+      "provider": "nvidia_nim",
+      "model": "meta/llama-3.1-70b-instruct"
+    }
+  }
+}
+```
+
+## OmniRoute {#omniroute}
+
+Use OmniRoute when you run a local [OmniRoute](https://github.com/diegosouzapw/OmniRoute) OpenAI-compatible router and want Zed AI features to go through it.
+
+1. Start OmniRoute locally (default base URL `http://localhost:20128/v1`).
+2. Open **Settings → AI → LLM Providers** with {#action agent::OpenSettings} and find the OmniRoute row.
+3. Enter your OmniRoute API key if your instance requires one.
+
+Zed also reads `OMNIROUTE_API_KEY` from the local Zed process environment.
+
+You can set a custom endpoint for OmniRoute in settings:
+
+```json [settings]
+{
+  "language_models": {
+    "omniroute": {
+      "api_url": "http://localhost:20128/v1"
+    }
+  }
+}
+```
+
+When using OmniRoute as your assistant provider, you can use the built-in `auto` model or any model your OmniRoute instance exposes:
+
+```json [settings]
+{
+  "agent": {
+    "default_model": {
+      "provider": "omniroute",
+      "model": "auto"
     }
   }
 }

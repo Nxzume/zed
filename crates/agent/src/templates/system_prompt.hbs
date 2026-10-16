@@ -250,6 +250,33 @@ To use a Skill:
 
 The following additional instructions are provided by the user and should be followed to the best of your ability{{#if (gt (len available_tools) 0)}} without interfering with the tool use guidelines{{/if}}.
 
+{{#if personal_agents_md_takes_precedence}}
+{{#if has_rules}}
+### Project Rules
+
+These instructions are scoped to the current project. Personal `AGENTS.md` below takes precedence when they conflict.
+
+There are project rules that apply to these root directories:
+{{#each worktrees}}
+{{#if rules_file}}
+`{{root_name}}/{{rules_file.path_in_worktree}}`:
+``````
+{{{rules_file.text}}}
+``````
+{{/if}}
+{{/each}}
+{{/if}}
+{{#if user_agents_md}}
+### Personal `AGENTS.md`
+
+These instructions apply to every project this user opens. They take precedence over project-specific rules above when they conflict.
+
+``````
+{{{user_agents_md}}}
+``````
+
+{{/if}}
+{{else}}
 {{#if user_agents_md}}
 ### Personal `AGENTS.md`
 
@@ -274,6 +301,7 @@ There are project rules that apply to these root directories:
 ``````
 {{/if}}
 {{/each}}
+{{/if}}
 {{/if}}
 
 {{/if}}

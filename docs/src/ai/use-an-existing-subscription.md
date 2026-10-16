@@ -60,7 +60,7 @@ OpenCode is a first-class language model provider in Zed. If you think of Zen or
 
 ## Cursor {#cursor}
 
-Cursor subscriptions do not configure Zed's LLM provider settings. Use a Cursor External Agent or Cursor CLI/TUI where available.
+Cursor subscriptions do not configure Zed's LLM provider settings. Use the [Cursor External Agent](./external-agents.md#cursor) (`agent acp`) or a [Terminal Thread](./terminal-threads.md) with the Cursor CLI.
 
 ## Subscriptions Used Through Agent Harnesses {#agent-harnesses}
 

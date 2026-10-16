@@ -74,9 +74,83 @@ Copilot agent auth is owned by the Copilot integration. To use Copilot Chat mode
 
 ## Cursor {#cursor}
 
-Use Cursor External Agents where available when you want Cursor running as an ACP-integrated External Agent in Zed.
+Use Cursor as an External Agent when you want the official Cursor agent harness running inside Zed over ACP. This is not a Zed LLM provider: Cursor owns auth, models, and billing. Do not configure Cursor under Zed's `language_models` settings.
 
-Cursor subscriptions do not configure Zed's LLM provider settings. Use Cursor's external-agent or CLI/TUI setup where available.
+### Install the Cursor Agent CLI {#cursor-install}
+
+1. Install the [Cursor app](https://cursor.com) or the [Cursor CLI](https://cursor.com/docs/cli/installation).
+2. Confirm the CLI works:
+
+```sh
+agent --version
+```
+
+On Windows, if `agent` is not on your `PATH`, use the full path to the launcher (see below).
+
+### Authenticate {#cursor-auth}
+
+Sign in with the Cursor CLI, or set an API key in the environment Zed inherits:
+
+```sh
+agent login
+```
+
+Or set `CURSOR_API_KEY` (and optionally `CURSOR_AUTH_TOKEN`) before starting Zed. Zed forwards those variables to the Cursor External Agent process.
+
+### Install in Zed {#cursor-zed-setup}
+
+**Option A — ACP Registry:** Open the registry with {#action zed::AcpRegistry}, install **Cursor**, then start a Cursor thread from the Agent Panel.
+
+**Option B — Custom Agent settings:** Add Cursor as a custom agent:
+
+```json [settings]
+{
+  "agent_servers": {
+    "cursor": {
+      "type": "custom",
+      "command": "agent",
+      "args": ["acp"]
+    }
+  }
+}
+```
+
+Zed resolves the `agent` command on `PATH` and checks common install locations when the agent id is `cursor`.
+
+### Windows paths {#cursor-windows}
+
+If Zed cannot find `agent`, set `command` to the absolute launcher path. Common locations:
+
+- `%LOCALAPPDATA%\cursor-agent\agent.cmd`
+- `%LOCALAPPDATA%\cursor-agent\cursor-agent.cmd`
+- `%LOCALAPPDATA%\Programs\cursor\resources\bin\agent.exe`
+
+Example:
+
+```json [settings]
+{
+  "agent_servers": {
+    "cursor": {
+      "type": "custom",
+      "command": "C:\\Users\\YOUR_USER\\AppData\\Local\\cursor-agent\\agent.cmd",
+      "args": ["acp"]
+    }
+  }
+}
+```
+
+### macOS and Linux paths {#cursor-unix}
+
+Typical CLI install locations:
+
+- `~/.local/bin/agent`
+- `/usr/local/bin/agent`
+
+After installing, ensure that directory is on your `PATH`, or set `command` to the absolute path.
+
+### Run a Cursor thread {#cursor-start}
+
+Open the [Agent Panel](./agent-panel.md), choose **Cursor** from the new-thread menu, and start a thread. Cursor runs via `agent acp` over ACP.
 
 ## Pi Coding Agent {#pi}
 
@@ -145,7 +219,7 @@ Examples:
 
 - Claude Agent may use Claude Code auth and Claude-native config.
 - Codex may use ChatGPT login, Codex API keys, OpenAI API keys, or Codex-native config.
-- Cursor subscriptions do not configure Zed's LLM provider settings; use Cursor's agent or CLI setup where available.
+- Cursor is an External Agent (`agent acp`), not a Zed LLM provider. Auth with `agent login` or `CURSOR_API_KEY`. See [Cursor](#cursor).
 - Pi Coding Agent is an agent harness. Configure provider auth in Pi.
 
 If an External Agent supports subscription-backed behavior, configure that in the agent unless the agent's Zed integration says otherwise.

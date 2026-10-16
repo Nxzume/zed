@@ -4618,12 +4618,15 @@ impl Thread {
         log::trace!("Building request messages from {} thread messages", end_ix);
 
         let user_agents_md = UserAgentsMd::global(cx).and_then(|s| s.content().cloned());
+        let personal_agents_md_takes_precedence =
+            AgentSettings::get_global(cx).personal_agents_md_takes_precedence;
         let system_prompt = SystemPromptTemplate {
             project: self.project_context.read(cx),
             available_tools,
             model_name: self.model().map(|m| m.name().0.to_string()),
             date: Local::now().format("%Y-%m-%d").to_string(),
             user_agents_md,
+            personal_agents_md_takes_precedence,
             sandboxing: crate::sandboxing::sandboxing_enabled_for_project(
                 self.project.read(cx),
                 cx,

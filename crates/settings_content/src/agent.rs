@@ -302,6 +302,12 @@ pub struct AgentSettingsContent {
     ///
     /// Default: true
     pub commit_message_include_project_rules: Option<bool>,
+    /// When true, personal `AGENTS.md` takes precedence over project instruction
+    /// files when they conflict. When false (the default), project instructions
+    /// override personal `AGENTS.md`.
+    ///
+    /// Default: false
+    pub personal_agents_md_takes_precedence: Option<bool>,
     /// Custom instructions to include in the prompt when generating git commit messages.
     /// Applied in addition to any project rules files (such as `.rules` or `AGENTS.md`).
     pub commit_message_instructions: Option<String>,
@@ -745,6 +751,8 @@ impl JsonSchema for LanguageModelProviderSetting {
                         "opencode",
                         "openrouter",
                         "vercel_ai_gateway",
+                        "nvidia_nim",
+                        "omniroute",
                         "x_ai",
                         "x_ai_subscribed",
                         "zed.dev"

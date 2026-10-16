@@ -364,6 +364,7 @@ impl AgentServerStore {
                         agent_name.clone(),
                         ExternalAgentEntry::new(
                             Box::new(LocalCustomAgent {
+                                agent_id: agent_name.clone(),
                                 command: command.clone(),
                                 project_environment: project_environment.clone(),
                             }) as Box<dyn ExternalAgentServer>,
@@ -1467,7 +1468,94 @@ fn bounded_npm_package_spec(package_spec: &str) -> (&str, String) {
     (package_name, format!("{package_name}@0.0.0 - {version}"))
 }
 
+/// Agent id used for Cursor External Agent settings (`agent_servers.cursor`).
+pub const CURSOR_AGENT_ID: &str = "cursor";
+
+/// Well-known names for the Cursor Agent CLI binary / launcher.
+const CURSOR_AGENT_BINARY_NAMES: &[&str] = &[
+    "agent",
+    "agent.cmd",
+    "cursor-agent",
+    "cursor-agent.cmd",
+];
+
+/// Common install locations for the Cursor `agent` CLI (without checking PATH).
+///
+/// Official installs typically place launchers under `%LOCALAPPDATA%\cursor-agent`
+/// on Windows and `~/.local/bin/agent` on macOS/Linux.
+pub fn cursor_agent_path_candidates() -> Vec<PathBuf> {
+    cursor_agent_path_candidates_with_dirs(
+        std::env::var_os("LOCALAPPDATA").map(PathBuf::from),
+        paths::home_dir().to_path_buf(),
+    )
+}
+
+fn cursor_agent_path_candidates_with_dirs(
+    local_app_data: Option<PathBuf>,
+    home: PathBuf,
+) -> Vec<PathBuf> {
+    let mut candidates = Vec::new();
+
+    if cfg!(target_os = "windows") {
+        if let Some(local_app_data) = local_app_data {
+            let cursor_agent_dir = local_app_data.join("cursor-agent");
+            candidates.push(cursor_agent_dir.join("agent.cmd"));
+            candidates.push(cursor_agent_dir.join("cursor-agent.cmd"));
+            candidates.push(cursor_agent_dir.join("agent.exe"));
+            candidates.push(cursor_agent_dir.join("cursor-agent.exe"));
+            candidates.push(
+                local_app_data
+                    .join("Programs")
+                    .join("cursor")
+                    .join("resources")
+                    .join("bin")
+                    .join("agent.exe"),
+            );
+        }
+    } else {
+        candidates.push(home.join(".local").join("bin").join("agent"));
+        candidates.push(home.join(".local").join("bin").join("cursor-agent"));
+        candidates.push(PathBuf::from("/usr/local/bin/agent"));
+        candidates.push(PathBuf::from("/usr/local/bin/cursor-agent"));
+    }
+
+    candidates
+}
+
+/// Resolves a configured Cursor agent command path to a concrete executable.
+///
+/// Prefers an existing configured path, then `PATH`, then common install locations.
+pub fn resolve_cursor_agent_command(configured: &Path) -> PathBuf {
+    if configured.is_file() {
+        return configured.to_path_buf();
+    }
+
+    if let Ok(path) = which::which(configured) {
+        return path;
+    }
+
+    let configured_name = configured.file_name().and_then(|name| name.to_str());
+    if configured_name.is_some_and(|name| CURSOR_AGENT_BINARY_NAMES.contains(&name))
+        || configured_name.is_none()
+    {
+        for name in CURSOR_AGENT_BINARY_NAMES {
+            if let Ok(path) = which::which(name) {
+                return path;
+            }
+        }
+    }
+
+    for candidate in cursor_agent_path_candidates() {
+        if candidate.is_file() {
+            return candidate;
+        }
+    }
+
+    configured.to_path_buf()
+}
+
 struct LocalCustomAgent {
+    agent_id: AgentId,
     project_environment: Entity<ProjectEnvironment>,
     command: AgentServerCommand,
 }
@@ -1480,8 +1568,12 @@ impl ExternalAgentServer for LocalCustomAgent {
         cx: &mut AsyncApp,
     ) -> Task<Result<AgentServerCommand>> {
         let mut command = self.command.clone();
+        let resolve_cursor_path = self.agent_id.as_ref() == CURSOR_AGENT_ID;
         let project_environment = self.project_environment.downgrade();
         cx.spawn(async move |cx| {
+            if resolve_cursor_path {
+                command.path = resolve_cursor_agent_command(&command.path);
+            }
             let mut env = project_environment
                 .update(cx, |project_environment, cx| {
                     project_environment.default_environment(cx)
@@ -2126,6 +2218,48 @@ mod tests {
                 .join("agent")
         );
         assert_eq!(std::fs::read(command.path).unwrap(), contents);
+    }
+
+    #[test]
+    fn test_cursor_agent_path_candidates_include_common_install_locations() {
+        let local_app_data = PathBuf::from("/tmp/LocalAppData");
+        let home = PathBuf::from("/tmp/home");
+        let candidates =
+            cursor_agent_path_candidates_with_dirs(Some(local_app_data.clone()), home.clone());
+
+        if cfg!(target_os = "windows") {
+            assert!(candidates.contains(&local_app_data.join("cursor-agent").join("agent.cmd")));
+            assert!(
+                candidates.contains(&local_app_data.join("cursor-agent").join("cursor-agent.cmd"))
+            );
+            assert!(candidates.contains(
+                &local_app_data
+                    .join("Programs")
+                    .join("cursor")
+                    .join("resources")
+                    .join("bin")
+                    .join("agent.exe")
+            ));
+        } else {
+            assert!(candidates.contains(&home.join(".local").join("bin").join("agent")));
+            assert!(candidates.contains(&PathBuf::from("/usr/local/bin/agent")));
+        }
+    }
+
+    #[test]
+    fn test_resolve_cursor_agent_command_keeps_existing_path() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let agent_path = temp_dir.path().join("agent");
+        std::fs::write(&agent_path, b"#!/bin/sh\n").unwrap();
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mut perms = std::fs::metadata(&agent_path).unwrap().permissions();
+            perms.set_mode(0o755);
+            std::fs::set_permissions(&agent_path, perms).unwrap();
+        }
+
+        assert_eq!(resolve_cursor_agent_command(&agent_path), agent_path);
     }
 
     #[gpui::test]

@@ -20,6 +20,9 @@ pub mod open_router;
 pub mod openai_subscribed;
 pub mod opencode;
 
+pub mod nvidia_nim;
+pub mod omniroute;
+pub mod openai_gateway;
 pub mod vercel_ai_gateway;
 pub mod x_ai;
 pub mod x_ai_subscribed;

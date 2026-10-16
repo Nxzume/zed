@@ -23,6 +23,18 @@ Create or edit:
 
 On Windows, the equivalent file is under `%APPDATA%\Zed\AGENTS.md`.
 
+By default, project instructions override personal `AGENTS.md` when they conflict. To keep your personal instructions authoritative in every project, open the Settings Editor and search for `personal_agents_md_takes_precedence`, then set it to `true`.
+
+Or add this to your settings.json:
+
+```json [settings]
+{
+  "agent": {
+    "personal_agents_md_takes_precedence": true
+  }
+}
+```
+
 ## Project Instructions {#project-instructions}
 
 Project instruction files apply to the current project. Zed uses the first matching file in this list:
@@ -37,7 +49,7 @@ Project instruction files apply to the current project. Zed uses the first match
 - `CLAUDE.md`
 - `GEMINI.md`
 
-Project instructions override personal `AGENTS.md` when they conflict.
+By default, project instructions override personal `AGENTS.md` when they conflict. Set [`personal_agents_md_takes_precedence`](#personal-instructions) to `true` to reverse that.
 
 ## Instruction File Support {#support}
 

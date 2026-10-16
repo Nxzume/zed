@@ -25,6 +25,8 @@ pub struct AllLanguageModelSettingsContent {
     pub openai: Option<OpenAiSettingsContent>,
     pub openai_compatible: Option<HashMap<Arc<str>, OpenAiCompatibleSettingsContent>>,
     pub vercel_ai_gateway: Option<VercelAiGatewaySettingsContent>,
+    pub nvidia_nim: Option<OpenAiGatewaySettingsContent>,
+    pub omniroute: Option<OpenAiGatewaySettingsContent>,
     pub x_ai: Option<XAiSettingsContent>,
     #[serde(rename = "zed.dev")]
     pub zed_dot_dev: Option<ZedDotDevSettingsContent>,
@@ -498,6 +500,27 @@ pub struct VercelAiGatewaySettingsContent {
 #[with_fallible_options]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema, MergeFrom)]
 pub struct VercelAiGatewayAvailableModel {
+    pub name: String,
+    pub display_name: Option<String>,
+    pub max_tokens: u64,
+    pub max_output_tokens: Option<u64>,
+    pub max_completion_tokens: Option<u64>,
+    #[serde(default)]
+    pub capabilities: OpenAiCompatibleModelCapabilities,
+}
+
+/// Settings for OpenAI-compatible gateway providers (NVIDIA NIM, OmniRoute, etc.).
+#[with_fallible_options]
+#[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq, JsonSchema, MergeFrom)]
+pub struct OpenAiGatewaySettingsContent {
+    pub api_url: Option<String>,
+    pub available_models: Option<Vec<OpenAiGatewayAvailableModel>>,
+    pub custom_headers: Option<HashMap<String, String>>,
+}
+
+#[with_fallible_options]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema, MergeFrom)]
+pub struct OpenAiGatewayAvailableModel {
     pub name: String,
     pub display_name: Option<String>,
     pub max_tokens: u64,
