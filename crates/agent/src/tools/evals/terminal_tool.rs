@@ -228,6 +228,7 @@ impl TerminalToolTest {
                 model_name: None,
                 date: chrono::Local::now().format("%Y-%m-%d").to_string(),
                 user_agents_md: None,
+                personal_agents_md_takes_precedence: false,
                 sandboxing: false,
                 is_linux: cfg!(target_os = "linux"),
                 is_windows: cfg!(target_os = "windows"),

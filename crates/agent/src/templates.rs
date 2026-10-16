@@ -46,6 +46,10 @@ pub struct SystemPromptTemplate<'a> {
     /// Contents of the user-global `~/.config/zed/AGENTS.md` file (or the
     /// platform equivalent), if present and non-empty.
     pub user_agents_md: Option<SharedString>,
+    /// When true, personal `AGENTS.md` is rendered after project rules and
+    /// is described as taking precedence over them. When false, project
+    /// rules are rendered last and override personal instructions.
+    pub personal_agents_md_takes_precedence: bool,
     /// Whether agent-run terminal commands are wrapped in an OS-level
     /// sandbox for this thread. When `true` — and the `terminal` tool is
     /// in `available_tools` — the rendered prompt describes the sandbox's
@@ -105,6 +109,7 @@ mod tests {
             model_name: Some("test-model".to_string()),
             date: "2026-01-01".to_string(),
             user_agents_md: None,
+            personal_agents_md_takes_precedence: false,
             sandboxing: false,
             is_linux: false,
             is_windows: false,
@@ -138,6 +143,7 @@ mod tests {
             model_name: Some("test-model".to_string()),
             date: "2026-01-01".to_string(),
             user_agents_md: Some("always be concise".into()),
+            personal_agents_md_takes_precedence: false,
             sandboxing: false,
             is_linux: false,
             is_windows: false,
@@ -149,12 +155,64 @@ mod tests {
         assert!(rendered.contains("always be concise"));
         assert!(rendered.contains("### Project Rules"));
         assert!(rendered.contains("project-specific guidance"));
+        assert!(rendered.contains("Project-specific rules below may override them."));
+        assert!(rendered.contains(
+            "They take precedence over the personal `AGENTS.md` above when they conflict."
+        ));
 
         let personal_idx = rendered.find("### Personal `AGENTS.md`").unwrap();
         let project_idx = rendered.find("### Project Rules").unwrap();
         assert!(
             personal_idx < project_idx,
             "personal AGENTS.md should render before project rules so project rules can override it"
+        );
+    }
+
+    #[test]
+    fn test_system_prompt_renders_personal_agents_md_after_project_rules_when_preferred() {
+        use prompt_store::{ProjectContext, RulesFileContext, WorktreeContext};
+        use util::rel_path::RelPath;
+
+        let worktrees = vec![WorktreeContext {
+            root_name: "my-project".to_string(),
+            abs_path: std::path::Path::new("/tmp/my-project").into(),
+            rules_file: Some(RulesFileContext {
+                path_in_worktree: RelPath::from_unix_str("AGENTS.md").unwrap().into(),
+                text: "project-specific guidance".to_string(),
+                project_entry_id: 1,
+            }),
+        }];
+        let project = ProjectContext::new(worktrees);
+        let template = SystemPromptTemplate {
+            project: &project,
+            available_tools: vec!["echo".into()],
+            model_name: Some("test-model".to_string()),
+            date: "2026-01-01".to_string(),
+            user_agents_md: Some("always be concise".into()),
+            personal_agents_md_takes_precedence: true,
+            sandboxing: false,
+            is_linux: false,
+            is_windows: false,
+        };
+        let templates = Templates::new();
+        let rendered = template.render(&templates).unwrap();
+
+        assert!(rendered.contains("### Personal `AGENTS.md`"));
+        assert!(rendered.contains("always be concise"));
+        assert!(rendered.contains("### Project Rules"));
+        assert!(rendered.contains("project-specific guidance"));
+        assert!(rendered.contains(
+            "Personal `AGENTS.md` below takes precedence when they conflict."
+        ));
+        assert!(rendered.contains(
+            "They take precedence over project-specific rules above when they conflict."
+        ));
+
+        let personal_idx = rendered.find("### Personal `AGENTS.md`").unwrap();
+        let project_idx = rendered.find("### Project Rules").unwrap();
+        assert!(
+            project_idx < personal_idx,
+            "personal AGENTS.md should render after project rules when it takes precedence"
         );
     }
 
@@ -167,6 +225,7 @@ mod tests {
             model_name: Some("test-model".to_string()),
             date: "2026-01-01".to_string(),
             user_agents_md: None,
+            personal_agents_md_takes_precedence: false,
             sandboxing: false,
             is_linux: false,
             is_windows: false,
@@ -200,6 +259,7 @@ mod tests {
             model_name: Some("test-model".to_string()),
             date: "2026-01-01".to_string(),
             user_agents_md: None,
+            personal_agents_md_takes_precedence: false,
             sandboxing: true,
             is_linux: false,
             is_windows: false,
@@ -243,6 +303,7 @@ mod tests {
             model_name: Some("test-model".to_string()),
             date: "2026-01-01".to_string(),
             user_agents_md: None,
+            personal_agents_md_takes_precedence: false,
             sandboxing: true,
             is_linux: true,
             is_windows: false,
@@ -276,6 +337,7 @@ mod tests {
             model_name: Some("test-model".to_string()),
             date: "2026-01-01".to_string(),
             user_agents_md: None,
+            personal_agents_md_takes_precedence: false,
             sandboxing: true,
             is_linux: false,
             is_windows: true,
@@ -306,6 +368,7 @@ mod tests {
             model_name: Some("test-model".to_string()),
             date: "2026-01-01".to_string(),
             user_agents_md: None,
+            personal_agents_md_takes_precedence: false,
             sandboxing: true,
             is_linux: false,
             is_windows: false,
@@ -328,6 +391,7 @@ mod tests {
             model_name: Some("test-model".to_string()),
             date: "2026-01-01".to_string(),
             user_agents_md: None,
+            personal_agents_md_takes_precedence: false,
             sandboxing: true,
             is_linux: false,
             is_windows: false,
@@ -348,6 +412,7 @@ mod tests {
             model_name: Some("test-model".to_string()),
             date: "2026-01-01".to_string(),
             user_agents_md: None,
+            personal_agents_md_takes_precedence: false,
             sandboxing: false,
             is_linux: false,
             is_windows: false,
@@ -366,6 +431,7 @@ mod tests {
             model_name: Some("test-model".to_string()),
             date: "2026-01-01".to_string(),
             user_agents_md: None,
+            personal_agents_md_takes_precedence: false,
             sandboxing: false,
             is_linux: false,
             is_windows: false,

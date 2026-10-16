@@ -1078,6 +1078,7 @@ mod tests {
             inline_assistant_use_streaming_tools: false,
             commit_message_model: None,
             commit_message_include_project_rules: true,
+            personal_agents_md_takes_precedence: false,
             commit_message_instructions: None,
             thread_summary_model: None,
             compaction_model: None,

@@ -1162,6 +1162,12 @@
     // Whether to include project rules files (AGENTS.md, CLAUDE.md, .rules, etc.)
     // in the prompt when generating git commit messages.
     "commit_message_include_project_rules": true,
+    // When true, personal AGENTS.md takes precedence over project instruction
+    // files when they conflict. When false, project instructions override
+    // personal AGENTS.md.
+    //
+    // Default: false
+    "personal_agents_md_takes_precedence": false,
     // Whether the agent is enabled.
     "enabled": true,
     // Whether to show the agent panel button in the status bar.
@@ -2701,6 +2707,12 @@
     },
     "vercel_ai_gateway": {
       "api_url": "https://ai-gateway.vercel.sh/v1",
+    },
+    "nvidia_nim": {
+      "api_url": "https://integrate.api.nvidia.com/v1",
+    },
+    "omniroute": {
+      "api_url": "http://localhost:20128/v1",
     },
     "x_ai": {
       "api_url": "https://api.x.ai/v1",

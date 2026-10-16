@@ -224,6 +224,7 @@ pub struct AgentSettings {
     pub inline_assistant_use_streaming_tools: bool,
     pub commit_message_model: Option<LanguageModelSelection>,
     pub commit_message_include_project_rules: bool,
+    pub personal_agents_md_takes_precedence: bool,
     pub commit_message_instructions: Option<String>,
     pub thread_summary_model: Option<LanguageModelSelection>,
     pub compaction_model: Option<LanguageModelSelection>,
@@ -802,6 +803,9 @@ impl Settings for AgentSettings {
                 .unwrap_or(true),
             commit_message_include_project_rules: agent
                 .commit_message_include_project_rules
+                .unwrap(),
+            personal_agents_md_takes_precedence: agent
+                .personal_agents_md_takes_precedence
                 .unwrap(),
             commit_message_model: agent.commit_message_model,
             commit_message_instructions: agent.commit_message_instructions,

@@ -7,7 +7,8 @@ use crate::provider::{
     anthropic, anthropic::AnthropicSettings, anthropic_compatible::AnthropicCompatibleSettings,
     bedrock, bedrock::AmazonBedrockSettings, cloud::ZedDotDevSettings, deepseek::DeepSeekSettings,
     google::GoogleSettings, llama_cpp::LlamaCppSettings, lmstudio::LmStudioSettings, mistral,
-    mistral::MistralSettings, ollama::OllamaSettings, open_ai::OpenAiSettings,
+    mistral::MistralSettings, nvidia_nim::NvidiaNimSettings, ollama::OllamaSettings,
+    omniroute::OmniRouteSettings, open_ai::OpenAiSettings,
     open_ai_compatible::OpenAiCompatibleSettings, open_router, open_router::OpenRouterSettings,
     opencode, opencode::OpenCodeSettings, resolve_custom_headers,
     vercel_ai_gateway::VercelAiGatewaySettings, x_ai::XAiSettings,
@@ -29,6 +30,8 @@ pub struct AllLanguageModelSettings {
     pub openai: OpenAiSettings,
     pub openai_compatible: HashMap<Arc<str>, OpenAiCompatibleSettings>,
     pub vercel_ai_gateway: VercelAiGatewaySettings,
+    pub nvidia_nim: NvidiaNimSettings,
+    pub omniroute: OmniRouteSettings,
     pub x_ai: XAiSettings,
     pub zed_dot_dev: ZedDotDevSettings,
 }
@@ -63,6 +66,8 @@ impl settings::Settings for AllLanguageModelSettings {
         let openai = language_models.openai.unwrap();
         let openai_compatible = language_models.openai_compatible.unwrap();
         let vercel_ai_gateway = language_models.vercel_ai_gateway.unwrap();
+        let nvidia_nim = language_models.nvidia_nim.unwrap();
+        let omniroute = language_models.omniroute.unwrap();
         let x_ai = language_models.x_ai.unwrap();
         let zed_dot_dev = language_models.zed_dot_dev.unwrap();
         Self {
@@ -199,6 +204,16 @@ impl settings::Settings for AllLanguageModelSettings {
                     vercel_ai_gateway.custom_headers,
                     &[],
                 ),
+            },
+            nvidia_nim: NvidiaNimSettings {
+                api_url: nvidia_nim.api_url.unwrap(),
+                available_models: nvidia_nim.available_models.unwrap_or_default(),
+                custom_headers: custom_headers_from("NVIDIA NIM", nvidia_nim.custom_headers, &[]),
+            },
+            omniroute: OmniRouteSettings {
+                api_url: omniroute.api_url.unwrap(),
+                available_models: omniroute.available_models.unwrap_or_default(),
+                custom_headers: custom_headers_from("OmniRoute", omniroute.custom_headers, &[]),
             },
             x_ai: XAiSettings {
                 api_url: x_ai.api_url.unwrap(),

@@ -61,12 +61,12 @@ Claude Pro and Max subscriptions are separate from Anthropic API credits. If you
 
 ## Cursor {#cursor}
 
-| Path                  | Support level   | What you get                                           | Account / billing           | Setup                                          |
-| --------------------- | --------------- | ------------------------------------------------------ | --------------------------- | ---------------------------------------------- |
-| Cursor External Agent | Hosted in Zed   | Cursor in an External Agent thread, where available    | Cursor account/subscription | [External Agents](./external-agents.md#cursor) |
-| Cursor CLI/TUI        | Run in terminal | Native Cursor command-line experience, where available | Cursor account/subscription | [Terminal Threads](./terminal-threads.md)      |
+| Path                  | Support level   | What you get                                     | Account / billing           | Setup                                          |
+| --------------------- | --------------- | ------------------------------------------------ | --------------------------- | ---------------------------------------------- |
+| Cursor External Agent | Hosted in Zed   | Cursor agent harness in an External Agent thread | Cursor account/subscription | [External Agents](./external-agents.md#cursor) |
+| Cursor CLI/TUI        | Run in terminal | Native Cursor CLI (`agent`) in a terminal thread | Cursor account/subscription | [Terminal Threads](./terminal-threads.md)      |
 
-Cursor subscriptions do not configure Zed's LLM provider settings. If you want to use a work Cursor subscription in Zed, use the Cursor External Agent or a Terminal Threads workflow where available.
+Cursor subscriptions do not configure Zed's LLM provider settings. To use Cursor in Zed, install the Cursor Agent CLI, authenticate with `agent login` or `CURSOR_API_KEY`, then install Cursor from the ACP Registry or add a custom `agent_servers.cursor` entry that runs `agent acp`. See [External Agents — Cursor](./external-agents.md#cursor).
 
 ## Pi Coding Agent {#pi}
 

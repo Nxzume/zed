@@ -45,19 +45,21 @@ Most API-access providers can be configured on the **Settings → AI → LLM Pro
 
 Zed also reads provider-specific environment variables. Non-empty [environment variables](../environment.md) take precedence over keychain values. If a key comes from an environment variable, unset the variable and restart Zed to stop using it.
 
-| Provider          | Environment variable                                  |
-| ----------------- | ----------------------------------------------------- |
-| Anthropic         | `ANTHROPIC_API_KEY`                                   |
-| OpenAI            | `OPENAI_API_KEY`                                      |
-| Google AI         | `GEMINI_API_KEY`, falling back to `GOOGLE_AI_API_KEY` |
-| Mistral           | `MISTRAL_API_KEY`                                     |
-| DeepSeek          | `DEEPSEEK_API_KEY`                                    |
-| xAI               | `XAI_API_KEY`                                         |
-| OpenCode          | `OPENCODE_API_KEY`                                    |
-| OpenRouter        | `OPENROUTER_API_KEY`                                  |
-| Vercel AI Gateway | `VERCEL_AI_GATEWAY_API_KEY`                           |
-| Ollama            | `OLLAMA_API_KEY`                                      |
-| LM Studio         | `LMSTUDIO_API_KEY`                                    |
+| Provider          | Environment variable                                   |
+| ----------------- | ------------------------------------------------------ |
+| Anthropic         | `ANTHROPIC_API_KEY`                                    |
+| OpenAI            | `OPENAI_API_KEY`                                       |
+| Google AI         | `GEMINI_API_KEY`, falling back to `GOOGLE_AI_API_KEY`  |
+| Mistral           | `MISTRAL_API_KEY`                                      |
+| DeepSeek          | `DEEPSEEK_API_KEY`                                     |
+| xAI               | `XAI_API_KEY`                                          |
+| OpenCode          | `OPENCODE_API_KEY`                                     |
+| OpenRouter        | `OPENROUTER_API_KEY`                                   |
+| Vercel AI Gateway | `VERCEL_AI_GATEWAY_API_KEY`                            |
+| NVIDIA NIM        | `NVIDIA_API_KEY`, falling back to `NVIDIA_NIM_API_KEY` |
+| OmniRoute         | `OMNIROUTE_API_KEY`                                    |
+| Ollama            | `OLLAMA_API_KEY`                                       |
+| LM Studio         | `LMSTUDIO_API_KEY`                                     |
 
 OpenAI-compatible provider environment variables are generated from the configured provider ID as upper snake case plus `_API_KEY`. For example, provider ID `my-gateway` uses `MY_GATEWAY_API_KEY`.
 

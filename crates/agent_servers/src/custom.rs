@@ -231,6 +231,16 @@ impl AgentServer for CustomAgentServer {
         if delegate.store.read(cx).no_browser() {
             extra_env.insert("NO_BROWSER".to_owned(), "1".to_owned());
         }
+        // Cursor External Agent (registry or custom) uses the official Cursor CLI
+        // (`agent acp`). Forward Cursor credentials from Zed's process environment.
+        if agent_id.as_ref() == CURSOR_ID {
+            if let Ok(api_key) = std::env::var("CURSOR_API_KEY") {
+                extra_env.insert("CURSOR_API_KEY".into(), api_key);
+            }
+            if let Ok(auth_token) = std::env::var("CURSOR_AUTH_TOKEN") {
+                extra_env.insert("CURSOR_AUTH_TOKEN".into(), auth_token);
+            }
+        }
         if is_registry_agent {
             match agent_id.as_ref() {
                 CLAUDE_AGENT_ID => {
